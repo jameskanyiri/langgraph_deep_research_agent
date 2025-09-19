@@ -60,7 +60,7 @@ Guidelines:
 
 
 # Node function
-def write_research_brief(state: AgentState) -> Command[Literal[END]]:
+def write_research_brief(state: AgentState) -> Command[Literal["research_phase"]]:
     """
     This node will be used to transform the conversation history into a research brief
 
@@ -83,7 +83,7 @@ def write_research_brief(state: AgentState) -> Command[Literal[END]]:
     response = structured_llm.invoke(messages)
 
     return Command(
-        goto=END,
+        goto="research_phase",
         update={
             "research_brief": response.research_brief,
         },
