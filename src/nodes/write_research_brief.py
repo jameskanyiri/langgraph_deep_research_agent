@@ -4,7 +4,7 @@ from src.state import AgentState
 from langgraph.graph import END
 from langchain.chat_models import init_chat_model
 from src.schema import WriteResearchBrief
-from langchain_core.messages import get_buffer_string, AIMessage
+from langchain_core.messages import get_buffer_string, AIMessage, HumanMessage
 from src.utils import get_today_str
 
 
@@ -86,5 +86,6 @@ def write_research_brief(state: AgentState) -> Command[Literal["research_phase"]
         goto="research_phase",
         update={
             "research_brief": response.research_brief,
+            "supervisor_messages": [HumanMessage(content=response.research_brief)],
         },
     )

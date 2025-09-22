@@ -1,18 +1,22 @@
 ## LangGraph Deep Research Agent
 
-An example LangGraph project that builds a small, deterministic multi-node agent to clarify a user's research request and generate a high-quality research brief. It uses LangChain's `init_chat_model` with structured output and the LangGraph CLI for a Dev UI.
+A sophisticated multi-agent research system built with LangGraph that orchestrates multiple specialized agents to conduct comprehensive research on complex topics. The system features a supervisor agent that coordinates parallel research activities using specialized research agents equipped with web search capabilities.
 
 ### Features
 
-- **Clarify user request**: Decides whether to ask a concise clarifying question or proceed.
-- **Write research brief**: Transforms the conversation into a detailed brief.
-- **Deterministic structure**: Uses Pydantic schemas for structured outputs.
-- **Dev UI via LangGraph CLI**: Run and chat with the agent locally.
+- **Multi-Agent Architecture**: Supervisor agent coordinates multiple parallel research agents
+- **Intelligent Research Coordination**: Supervisor decides research topics and manages parallel execution
+- **Web Search Integration**: Research agents use Tavily API for real-time web search
+- **Strategic Thinking**: Built-in reflection tools for quality decision-making during research
+- **Research Compression**: Intelligent summarization of findings for supervisor consumption
+- **Clarification System**: Initial clarification to refine research scope
+- **Dev UI via LangGraph CLI**: Run and chat with the agent locally
 
 ### Requirements
 
 - Python 3.13+
-- An OpenAI API key (for `gpt-4o-mini` via `langchain-openai`)
+- An OpenAI API key (for `gpt-4o-mini` and `gpt-4.1` via `langchain-openai`)
+- A Tavily API key (for web search capabilities)
 
 ### Quickstart
 
@@ -44,7 +48,8 @@ cp .env.example .env
 
 Required variables:
 
-- `OPENAI_API_KEY`: Your OpenAI key used by `langchain-openai`.
+- `OPENAI_API_KEY`: Your OpenAI key used by `langchain-openai`
+- `TAVILY_API_KEY`: Your Tavily API key for web search capabilities
 
 Optional (for LangChain telemetry):
 
@@ -58,59 +63,123 @@ This project ships a `langgraph.json` that points to the graph in `src/graph.py`
 langgraph dev
 ```
 
-This launches a local Dev UI in your browser. Select `deep_research_agent` and start chatting. The agent will either:
+This launches a local Dev UI in your browser. Select `deep_research_agent` and start chatting. The system will:
 
-- Ask one clarifying question and stop, or
-- Confirm it has enough info and proceed to generate a research brief.
+1. **Clarify** your request if needed
+2. **Generate** a detailed research brief from the conversation
+3. **Coordinate** parallel research agents to investigate different aspects
+4. **Compress** and synthesize findings into comprehensive results
+
+You can also run individual components:
+
+- `research_agent`: Individual research agent with search capabilities
+- `supervisor_agent`: Supervisor that coordinates research activities
 
 ### Programmatic usage
 
-You can also run the compiled graph directly from Python.
+You can also run the compiled graphs directly from Python.
 
 ```python
-from langgraph.graph import MessagesState
 from src.graph import graph
+from src.research_agent.agent import research_agent
+from src.supervisor.supervisor import supervisor_agent
 
-state: MessagesState = {"messages": [
+# Run the full research pipeline
+state = {"messages": [
     {"role": "user", "content": "Research top hiking backpacks for multi-day trips in 2025."}
 ]}
 
-app = graph
-result = app.invoke(state)
-print(result.get("research_brief"))
-```
+result = graph.invoke(state)
+print(result.get("notes"))  # Final research findings
 
-Note: The graph compiled in `src/graph.py` expects a `MessagesState`-compatible input with `messages`.
+# Run individual components
+research_result = research_agent.invoke({
+    "research_brief": "Compare hiking backpacks for 3+ day trips",
+    "researcher_messages": []
+})
+
+supervisor_result = supervisor_agent.invoke({
+    "research_brief": "Comprehensive analysis of hiking backpacks",
+    "supervisor_messages": []
+})
+```
 
 ### Project structure
 
 ```text
 src/
-  graph.py              # Builds and compiles the StateGraph
-  state.py              # Agent state definitions (InputState, AgentState)
+  graph.py              # Main research pipeline orchestration
+  state.py              # Core state definitions (InputState, AgentState)
   schema.py             # Pydantic models for structured outputs
-  utils.py              # Small helpers (date formatting)
+  utils.py              # Helper utilities (date formatting)
+
   nodes/
-    clarify_user_request.py  # Clarification router node
-    write_research_brief.py  # Brief-generation node
-langgraph.json          # CLI configuration (exposes deep_research_agent)
-main.py                 # Placeholder entry point
-notebook/evals.ipynb    # (Optional) space for experiments/evaluations
+    clarify_user_request.py  # Initial clarification node
+    write_research_brief.py  # Research brief generation node
+
+  supervisor/           # Supervisor agent coordination
+    supervisor.py       # Main supervisor agent implementation
+    state.py           # Supervisor state management
+    tools.py           # Supervisor tools (ConductResearch, ResearchComplete)
+    prompt.py          # Supervisor system prompts
+    utils.py           # Supervisor utilities
+
+  research_agent/       # Individual research agents
+    agent.py           # Research agent implementation
+    state.py           # Research agent state management
+    prompt.py          # Research agent prompts
+    schema.py          # Research agent schemas
+    tools/
+      tavily/          # Web search integration
+        tavily.py      # Tavily search tool
+        utils.py       # Search result processing
+        prompt.py      # Search-specific prompts
+      think/           # Strategic thinking tools
+        think.py       # Reflection and decision-making tool
+
+langgraph.json          # CLI configuration (exposes all agents)
+main.py                 # Entry point
+notebook/              # Evaluation notebooks
+  clarify_with_user_evals.ipynb
+  research_phase_evals.ipynb
 ```
 
 ### How it works
 
-- `src/graph.py` defines a `StateGraph` with two nodes:
+The system operates through a sophisticated multi-agent pipeline:
 
-  - `clarify_user_request`: Uses a structured schema `ClarifyUserRequest` to decide whether to ask a question (`need_clarification=True`) or proceed. If clarification is needed, it ends the graph and returns the question as an AI message.
-  - `write_research_brief`: Uses `WriteResearchBrief` to produce a well-scoped, detailed brief from the message history, storing it on `AgentState.research_brief`.
+#### 1. Initial Processing (`src/graph.py`)
 
-- `src/state.py` defines:
+- `clarify_user_request`: Analyzes the user's request and decides whether clarification is needed
+- `write_research_brief`: Transforms the conversation into a detailed research brief using structured output
 
-  - `InputState(MessagesState)` – input schema compatible with LangGraph message flows.
-  - `AgentState(MessagesState)` – extends state with a `research_brief: str` field.
+#### 2. Research Coordination (`src/supervisor/`)
 
-- `src/schema.py` contains Pydantic models that constrain the LLM outputs to avoid hallucinated structure.
+- **Supervisor Agent**: Orchestrates the research process using `gpt-4.1`
+- **Decision Making**: Analyzes research brief and decides what topics need investigation
+- **Parallel Execution**: Launches multiple research agents simultaneously (up to 3 concurrent)
+- **Tool Management**: Uses `ConductResearch` and `ResearchComplete` tools to coordinate activities
+
+#### 3. Individual Research (`src/research_agent/`)
+
+- **Research Agents**: Specialized agents using `gpt-4o-mini` for focused research
+- **Web Search**: Integrated Tavily API for real-time web search capabilities
+- **Strategic Thinking**: Built-in reflection tools for quality decision-making
+- **Research Compression**: Intelligent summarization of findings for supervisor consumption
+
+#### 4. State Management
+
+- `InputState`: Compatible with LangGraph message flows
+- `AgentState`: Extends state with research brief and supervisor messages
+- `SupervisorState`: Manages supervisor coordination and research iterations
+- `ResearcherState`: Handles individual research agent state
+
+#### 5. Tool Integration
+
+- **Tavily Search**: Web search with result deduplication and processing
+- **Think Tool**: Strategic reflection for research quality
+- **ConductResearch**: Delegates research tasks to specialized agents
+- **ResearchComplete**: Signals research completion
 
 ### Configuration
 
@@ -119,7 +188,9 @@ notebook/evals.ipynb    # (Optional) space for experiments/evaluations
 ```json
 {
   "graphs": {
-    "deep_research_agent": "src/graph.py:graph"
+    "deep_research_agent": "src/graph.py:graph",
+    "research_agent": "src/research_agent/agent.py:research_agent",
+    "supervisor_agent": "src/supervisor/supervisor.py:supervisor_agent"
   },
   "dependencies": ["."],
   "env": "./.env",
@@ -134,9 +205,11 @@ notebook/evals.ipynb    # (Optional) space for experiments/evaluations
 
 ### Troubleshooting
 
-- "Model not found" or auth errors: ensure `OPENAI_API_KEY` is set and valid.
-- Import errors for `langgraph` or `langchain-openai`: re-run `uv sync` or `pip install -e .`.
-- Dev UI doesn’t show the graph: confirm `langgraph.json` points to `src/graph.py:graph` and that your venv is active.
+- "Model not found" or auth errors: ensure `OPENAI_API_KEY` and `TAVILY_API_KEY` are set and valid.
+- Import errors for `langgraph`, `langchain-openai`, or `tavily-python`: re-run `uv sync` or `pip install -e .`.
+- Dev UI doesn't show the graphs: confirm `langgraph.json` points to the correct graph definitions and that your venv is active.
+- Research agents not finding results: check your Tavily API key and quota limits.
+- Supervisor not launching research: verify the research brief is properly formatted and contains actionable research topics.
 
 ### License
 

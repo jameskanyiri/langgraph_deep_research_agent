@@ -1,7 +1,8 @@
 {
   "graphs": {
     "deep_research_agent": "src/graph.py:graph",
-    "research_agent": "src/research_agent/agent.py:research_agent"
+    "research_agent": "src/research_agent/agent.py:research_agent",
+    "supervisor_agent": "src/supervisor/supervisor.py:supervisor_agent"
   },
   "dependencies": ["."],
   "env": "./.env",

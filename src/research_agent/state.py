@@ -9,6 +9,8 @@ class ResearcherInputState(TypedDict):
     State for the research agent containing message history and research metadata
     """
     research_brief: str
+    researcher_messages: Annotated[Sequence[BaseMessage], add_messages]
+    
 
 
 class ResearcherState(TypedDict):
