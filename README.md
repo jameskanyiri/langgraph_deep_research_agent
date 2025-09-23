@@ -1,10 +1,17 @@
 ## LangGraph Deep Research Agent
 
-A sophisticated multi-agent research system built with LangGraph that orchestrates multiple specialized agents to conduct comprehensive research on complex topics. The system features a supervisor agent that coordinates parallel research activities using specialized research agents equipped with web search capabilities.
+Deep research has broken out as one of the most popular agent applications.
+
+Built with LangGraph, this sophisticated multi-agent research system orchestrates multiple specialized agents to conduct comprehensive research on complex topics. The system features a supervisor agent that coordinates parallel research activities using specialized research agents equipped with web search capabilities.
+
+![Deep Research Agent Architecture](static/graph.png)
 
 ### Features
 
+- **Deep Research Capabilities**: Comprehensive research on complex topics with multi-layered investigation
 - **Multi-Agent Architecture**: Supervisor agent coordinates multiple parallel research agents
+- **Model Provider Flexibility**: Works across many model providers (OpenAI, Anthropic, etc.)
+- **Configurable Search Tools**: Supports multiple search engines and MCP servers
 - **Intelligent Research Coordination**: Supervisor decides research topics and manages parallel execution
 - **Web Search Integration**: Research agents use Tavily API for real-time web search
 - **Strategic Thinking**: Built-in reflection tools for quality decision-making during research
@@ -15,8 +22,11 @@ A sophisticated multi-agent research system built with LangGraph that orchestrat
 ### Requirements
 
 - Python 3.13+
-- An OpenAI API key (for `gpt-4o-mini` and `gpt-4.1` via `langchain-openai`)
-- A Tavily API key (for web search capabilities)
+- API keys for your chosen model provider(s):
+  - OpenAI API key (for `gpt-4o-mini` and `gpt-4o` via `langchain-openai`)
+  - Anthropic API key (for Claude models via `langchain-anthropic`)
+  - Other supported providers as needed
+- A Tavily API key (for web search capabilities) or other search tool APIs
 
 ### Quickstart
 
@@ -46,9 +56,10 @@ Copy `.env.example` to `.env` and set your keys.
 cp .env.example .env
 ```
 
-Required variables:
+Required variables (choose based on your model provider):
 
-- `OPENAI_API_KEY`: Your OpenAI key used by `langchain-openai`
+- `OPENAI_API_KEY`: Your OpenAI key used by `langchain-openai` (if using OpenAI models)
+- `ANTHROPIC_API_KEY`: Your Anthropic key used by `langchain-anthropic` (if using Claude models)
 - `TAVILY_API_KEY`: Your Tavily API key for web search capabilities
 
 Optional (for LangChain telemetry):
@@ -63,17 +74,21 @@ This project ships a `langgraph.json` that points to the graph in `src/graph.py`
 langgraph dev
 ```
 
-This launches a local Dev UI in your browser. Select `deep_research_agent` and start chatting. The system will:
+This launches a local Dev UI in your browser. Select `deep_research_agent` and start chatting. The system will conduct deep, multi-layered research:
 
-1. **Clarify** your request if needed
+1. **Clarify** your request if needed to ensure comprehensive coverage
 2. **Generate** a detailed research brief from the conversation
-3. **Coordinate** parallel research agents to investigate different aspects
-4. **Compress** and synthesize findings into comprehensive results
+3. **Coordinate** parallel research agents to investigate different aspects simultaneously
+4. **Compress** and synthesize findings into comprehensive, well-researched results
 
 You can also run individual components:
 
 - `research_agent`: Individual research agent with search capabilities
 - `supervisor_agent`: Supervisor that coordinates research activities
+
+### Performance
+
+This deep research agent has been designed to achieve performance on par with many popular deep research agents. The multi-agent architecture, strategic thinking capabilities, and comprehensive research coordination enable it to compete effectively on the Deep Research Bench leaderboard.
 
 ### Programmatic usage
 
