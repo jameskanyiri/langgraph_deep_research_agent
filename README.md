@@ -1,31 +1,41 @@
-## LangGraph Deep Research Agent
+## LangGraph Deep Research
 
-Deep research has broken out as one of the most popular agent applications.
+Deep research has broken out as one of the most popular agent applications. OpenAI, Anthropic, Perplexity and Google all have a deep research to produce comprehensive report
 
-Built with LangGraph, this sophisticated multi-agent research system orchestrates multiple specialized agents to conduct comprehensive research on complex topics. The system features a supervisor agent that coordinates parallel research activities using specialized research agents equipped with web search capabilities.
+Built with LangGraph, this Deep research system orchestrates multiple specialized agents to conduct comprehensive research on complex topics. The system features a supervisor agent that coordinates parallel research activities using specialized research agents equipped with web search capabilities.
 
 ![Deep Research Agent Architecture](static/graph.png)
 
 ### Features
 
-- **Deep Research Capabilities**: Comprehensive research on complex topics with multi-layered investigation
-- **Multi-Agent Architecture**: Supervisor agent coordinates multiple parallel research agents
-- **Model Provider Flexibility**: Works across many model providers (OpenAI, Anthropic, etc.)
-- **Configurable Search Tools**: Supports multiple search engines and MCP servers
-- **Intelligent Research Coordination**: Supervisor decides research topics and manages parallel execution
-- **Web Search Integration**: Research agents use Tavily API for real-time web search
+The system operates through three distinct phases:
+
+#### 🔍 **Scoping Phase** - Gather User Context
+
+- **Intelligent Clarification**: Analyzes user requests and asks targeted questions to refine research scope
+- **Context Gathering**: Understands user needs, requirements, and expectations for the research
+- **Scope Definition**: Transforms conversations into detailed research briefs with clear objectives
+
+#### 🔬 **Research Phase** - Gather Comprehensive Information
+
+- **Adaptive Research Strategy**: Automatically determines whether to conduct parallel or sequential research based on topic complexity
+- **Multi-Agent Coordination**: Supervisor agent orchestrates multiple specialized research agents
+- **Parallel Processing**: Can run up to 3 research agents simultaneously for faster results
+- **Web Search Integration**: Real-time web search using Tavily API for current information
 - **Strategic Thinking**: Built-in reflection tools for quality decision-making during research
-- **Research Compression**: Intelligent summarization of findings for supervisor consumption
-- **Clarification System**: Initial clarification to refine research scope
-- **Dev UI via LangGraph CLI**: Run and chat with the agent locally
+- **Research Compression**: Intelligent summarization of findings for efficient processing
+
+#### 📝 **Writing Phase** - Generate Final Report
+
+- **Comprehensive Synthesis**: Combines all research findings into a cohesive, well-structured report
+- **Quality Assurance**: Ensures accuracy and completeness of the final output
+- **Professional Formatting**: Delivers polished, publication-ready research reports
 
 ### Requirements
 
 - Python 3.13+
 - API keys for your chosen model provider(s):
   - OpenAI API key (for `gpt-4o-mini` and `gpt-4o` via `langchain-openai`)
-  - Anthropic API key (for Claude models via `langchain-anthropic`)
-  - Other supported providers as needed
 - A Tavily API key (for web search capabilities) or other search tool APIs
 
 ### Quickstart
@@ -33,8 +43,7 @@ Built with LangGraph, this sophisticated multi-agent research system orchestrate
 #### 1) Clone and setup environment
 
 ```bash
-git clone https://github.com/your-org/langgraph_deep_agents.git
-cd langgraph_deep_agents
+git clone https://github.com/jameskanyiri/langgraph_deep_research.git
 
 # Using uv (recommended)
 uv venv
@@ -74,12 +83,24 @@ This project ships a `langgraph.json` that points to the graph in `src/graph.py`
 langgraph dev
 ```
 
-This launches a local Dev UI in your browser. Select `deep_research_agent` and start chatting. The system will conduct deep, multi-layered research:
+This launches a local Dev UI in your browser. Select `deep_research_agent` and start chatting. The system operates through three distinct phases:
+
+#### 🔍 **Phase 1: Scoping** - Gather User Context
 
 1. **Clarify** your request if needed to ensure comprehensive coverage
-2. **Generate** a detailed research brief from the conversation
-3. **Coordinate** parallel research agents to investigate different aspects simultaneously
-4. **Compress** and synthesize findings into comprehensive, well-researched results
+2. **Gather** context about what you need research on
+3. **Generate** a detailed research brief from the conversation
+
+#### 🔬 **Phase 2: Research** - Gather Comprehensive Information
+
+4. **Coordinate** parallel research agents to investigate different aspects simultaneously
+5. **Adapt** research strategy (parallel or sequential) based on topic complexity
+6. **Search** and analyze information using web search capabilities
+
+#### 📝 **Phase 3: Writing** - Generate Final Report
+
+7. **Compress** and synthesize findings into comprehensive results
+8. **Generate** the final research report with professional formatting
 
 You can also run individual components:
 
@@ -90,97 +111,45 @@ You can also run individual components:
 
 This deep research agent has been designed to achieve performance on par with many popular deep research agents. The multi-agent architecture, strategic thinking capabilities, and comprehensive research coordination enable it to compete effectively on the Deep Research Bench leaderboard.
 
-### Programmatic usage
-
-You can also run the compiled graphs directly from Python.
-
-```python
-from src.graph import graph
-from src.research_agent.agent import research_agent
-from src.supervisor.supervisor import supervisor_agent
-
-# Run the full research pipeline
-state = {"messages": [
-    {"role": "user", "content": "Research top hiking backpacks for multi-day trips in 2025."}
-]}
-
-result = graph.invoke(state)
-print(result.get("notes"))  # Final research findings
-
-# Run individual components
-research_result = research_agent.invoke({
-    "research_brief": "Compare hiking backpacks for 3+ day trips",
-    "researcher_messages": []
-})
-
-supervisor_result = supervisor_agent.invoke({
-    "research_brief": "Comprehensive analysis of hiking backpacks",
-    "supervisor_messages": []
-})
-```
-
-### Project structure
-
-```text
-src/
-  graph.py              # Main research pipeline orchestration
-  state.py              # Core state definitions (InputState, AgentState)
-  schema.py             # Pydantic models for structured outputs
-  utils.py              # Helper utilities (date formatting)
-
-  nodes/
-    clarify_user_request.py  # Initial clarification node
-    write_research_brief.py  # Research brief generation node
-
-  supervisor/           # Supervisor agent coordination
-    supervisor.py       # Main supervisor agent implementation
-    state.py           # Supervisor state management
-    tools.py           # Supervisor tools (ConductResearch, ResearchComplete)
-    prompt.py          # Supervisor system prompts
-    utils.py           # Supervisor utilities
-
-  research_agent/       # Individual research agents
-    agent.py           # Research agent implementation
-    state.py           # Research agent state management
-    prompt.py          # Research agent prompts
-    schema.py          # Research agent schemas
-    tools/
-      tavily/          # Web search integration
-        tavily.py      # Tavily search tool
-        utils.py       # Search result processing
-        prompt.py      # Search-specific prompts
-      think/           # Strategic thinking tools
-        think.py       # Reflection and decision-making tool
-
-langgraph.json          # CLI configuration (exposes all agents)
-main.py                 # Entry point
-notebook/              # Evaluation notebooks
-  clarify_with_user_evals.ipynb
-  research_phase_evals.ipynb
-```
-
 ### How it works
 
-The system operates through a sophisticated multi-agent pipeline:
+The system operates through a sophisticated three-phase multi-agent pipeline:
 
-#### 1. Initial Processing (`src/graph.py`)
+#### 🔍 **Phase 1: Scoping** - Gather User Context (`src/graph.py`)
 
-- `clarify_user_request`: Analyzes the user's request and decides whether clarification is needed
-- `write_research_brief`: Transforms the conversation into a detailed research brief using structured output
+**Purpose**: Understand what the user needs research on and refine the scope
 
-#### 2. Research Coordination (`src/supervisor/`)
+- **`clarify_user_request`**: Analyzes the user's request and decides whether clarification is needed
+- **Context Gathering**: Asks targeted questions to understand user requirements and expectations
+- **`write_research_brief`**: Transforms the conversation into a detailed research brief using structured output
+- **Scope Definition**: Creates clear objectives and research parameters
+
+#### 🔬 **Phase 2: Research** - Gather Comprehensive Information
+
+**Purpose**: Conduct thorough research on the defined topics
+
+##### Research Coordination (`src/supervisor/`)
 
 - **Supervisor Agent**: Orchestrates the research process using `gpt-4.1`
-- **Decision Making**: Analyzes research brief and decides what topics need investigation
+- **Adaptive Strategy**: Decides whether to conduct parallel or sequential research based on topic complexity
 - **Parallel Execution**: Launches multiple research agents simultaneously (up to 3 concurrent)
 - **Tool Management**: Uses `ConductResearch` and `ResearchComplete` tools to coordinate activities
 
-#### 3. Individual Research (`src/research_agent/`)
+##### Individual Research (`src/research_agent/`)
 
 - **Research Agents**: Specialized agents using `gpt-4o-mini` for focused research
 - **Web Search**: Integrated Tavily API for real-time web search capabilities
 - **Strategic Thinking**: Built-in reflection tools for quality decision-making
 - **Research Compression**: Intelligent summarization of findings for supervisor consumption
+
+#### 📝 **Phase 3: Writing** - Generate Final Report
+
+**Purpose**: Synthesize research findings into a comprehensive, well-structured report
+
+- **Comprehensive Synthesis**: Combines all research findings into a cohesive narrative
+- **Quality Assurance**: Ensures accuracy and completeness of the final output
+- **Professional Formatting**: Delivers polished, publication-ready research reports
+- **Final Delivery**: Presents findings in a clear, actionable format
 
 #### 4. State Management
 
